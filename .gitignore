@@ -1,0 +1,17 @@
+# Variáveis de ambiente
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Ambientes virtuais
+.venv/
+venv/
+
+# IDEs
+.idea/
+.vscode/
+
+# PPTX
+*.pptx

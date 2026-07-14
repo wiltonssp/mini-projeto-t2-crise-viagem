@@ -1,0 +1,95 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  lint:
+    name: Lint Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ruff
+        run: pip install ruff==0.4.8
+
+      - name: Run ruff linter
+        run: ruff check src/ tests/
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov
+
+      - name: Run unit tests with coverage
+        env:
+          GROQ_API_KEY: fake_key_for_ci
+        run: |
+          pytest tests/ \
+            --cov=src \
+            --cov-report=term-missing \
+            --cov-report=html:htmlcov \
+            --cov-fail-under=50 \
+            -v
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: htmlcov/
+
+  documentation:
+    name: Documentation Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check documentation files
+        run: |
+          test -f README.md        || (echo "ERROR: README.md not found" && exit 1)
+          test -f PRD.md           || (echo "ERROR: PRD.md not found" && exit 1)
+          test -f product.md       || (echo "ERROR: product.md not found" && exit 1)
+          test -f INSTALLATION.md  || (echo "ERROR: INSTALLATION.md not found" && exit 1)
+          test -d docs             || (echo "ERROR: docs/ directory not found" && exit 1)
+
+  deploy:
+    name: Simulated Deploy
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+      - test
+      - documentation
+    steps:
+      - name: Simulate deploy
+        run: echo "Deploy would run here after lint, tests and documentation validation passed successfully."
