@@ -318,8 +318,12 @@ def validacao_node(state: EstadoCrise) -> dict:
             "mensagem_usuario": mensagem,
         }
 
-    # Verificar domínio - SKIP quando código vem da memória (contexto de sessão já estabelecido)
-    if not codigo_da_memoria:
+    # Verificar domínio - SKIP quando:
+    # 1. Código vem da memória (contexto de sessão já estabelecido)
+    # 2. Código foi fornecido na mensagem (fornecimento de código de reserva
+    #    já indica contexto de viagem — a mensagem residual pode ser genérica
+    #    como "qual o status?" sem palavras-chave de domínio)
+    if not codigo_da_memoria and not codigo:
         dominio_ok, erro_dominio = verificar_dominio(mensagem)
         if not dominio_ok:
             erros.append({"nó": "validacao", "erro": erro_dominio})
@@ -502,6 +506,11 @@ def _eh_pergunta_simples(mensagem: str) -> bool:
     # Padrões de perguntas simples/informativas
     padroes_simples = [
         r"qual\s+(é|e)?\s*(a|o)\s+(data|hora|horário|horario|destino|origem|status|situação|situacao|previsão|previsao|clima|tempo)",
+        r"status\s+(do|de|da)\s+(meu|minha)?\s*(voo|reserva|viagem)",
+        r"(meu|minha)\s+voo\s+(está|esta|tá|ta)\s+(como|onde)",
+        r"como\s+(está|esta|tá|ta)\s+(meu|minha|o)?\s*(voo|reserva)",
+        r"situação\s+(do|de|da)\s+(meu|minha)?\s*(voo|reserva|viagem)",
+        r"situacao\s+(do|de|da)\s+(meu|minha)?\s*(voo|reserva|viagem)",
         r"quando\s+(sai|parte|chega|decola|pousa)",
         r"que\s+horas?\s+(sai|parte|chega|é|e)",
         r"para\s+onde\s+vai",
@@ -561,7 +570,7 @@ def gerar_plano_node(state: EstadoCrise) -> dict:
         politicas = state.get("politicas_recuperadas", [])
         direitos = state.get("direitos_passageiro", [])
         mensagem_usuario = state.get("mensagem_usuario", "")
-        erros = state.get("erros", [])
+        _ = state.get("erros", [])
 
         # Verificar se é uma pergunta simples ou uma situação de crise
         if _eh_pergunta_simples(mensagem_usuario):

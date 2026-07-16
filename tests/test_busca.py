@@ -1,6 +1,5 @@
 """Testes unitários para o módulo de busca semântica."""
 
-import pytest
 from src.rag.busca import BuscaSemantica
 
 
