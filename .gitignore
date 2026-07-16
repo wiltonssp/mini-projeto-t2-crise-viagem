@@ -15,3 +15,6 @@ venv/
 
 # PPTX
 *.pptx
+
+#.kiro\specs
+.kiro/
