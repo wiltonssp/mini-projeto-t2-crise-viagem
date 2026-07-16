@@ -1,19 +1,28 @@
 # Guia de Instalação — Viagem Inteligente
 
+> **Repositório:** [https://github.com/wiltonssp/mini-projeto-t2-crise-viagem](https://github.com/wiltonssp/mini-projeto-t2-crise-viagem)
+
 ## Pré-requisitos
 
 | Requisito | Versão Mínima | Verificação |
 |-----------|---------------|-------------|
 | Python | 3.10+ | `python --version` |
 | pip | 21.0+ | `pip --version` |
+| Git | 2.0+ | `git --version` |
 | Conexão Internet | — | Necessário para API Open-Meteo e Groq |
 | GROQ_API_KEY | — | Obtida em [console.groq.com](https://console.groq.com/) |
 
-## Passo 1: Obter o Código
+## Passo 1: Clonar o Repositório
 
 ```bash
-# Clone o repositório ou copie os arquivos para uma pasta local
-cd "Mini-Projeto"
+git clone https://github.com/wiltonssp/mini-projeto-t2-crise-viagem.git
+cd mini-projeto-t2-crise-viagem
+```
+
+Ou baixe o ZIP diretamente:
+
+```
+https://github.com/wiltonssp/mini-projeto-t2-crise-viagem/archive/refs/heads/main.zip
 ```
 
 ## Passo 2: Criar Ambiente Virtual
@@ -61,6 +70,8 @@ pip install -r requirements.txt
 | `requests` | ≥2.31 | Chamadas HTTP (Open-Meteo API) |
 | `scikit-learn` | ≥1.3 | TF-IDF e similaridade cosseno |
 | `numpy` | ≥1.24 | Operações vetoriais |
+| `pytest` | ≥7.0 | Testes unitários |
+| `pytest-cov` | ≥4.0 | Cobertura de testes |
 
 ### Verificar Instalação
 
@@ -119,6 +130,19 @@ python main.py cli ABC123 "Meu voo foi cancelado por mau tempo e vou perder minh
 
 Formato: `python main.py cli <CODIGO_RESERVA> <MENSAGEM>`
 
+## Passo 6: Executar Testes
+
+```bash
+# Todos os testes
+pytest tests/ -v
+
+# Com cobertura
+pytest tests/ --cov=src --cov-report=term-missing -v
+
+# Teste específico
+pytest tests/test_validacao.py -v
+```
+
 ## Verificação da Instalação
 
 Execute o seguinte para validar que tudo está configurado:
@@ -145,7 +169,7 @@ else:
     print('GROQ_API_KEY: NÃO CONFIGURADA')
     print('  Configure no arquivo .env')
 
-print('\\nInstalação concluída!')
+print('\nInstalação concluída!')
 "
 ```
 
@@ -200,6 +224,19 @@ Se encontrar erros de encoding ao executar, configure:
 ```cmd
 set PYTHONIOENCODING=utf-8
 python main.py web
+```
+
+### Erro ao clonar o repositório
+
+Se receber erro de autenticação:
+
+```bash
+# Verifique se o Git está configurado
+git config --global user.name "Seu Nome"
+git config --global user.email "seu@email.com"
+
+# Clone via HTTPS (não requer SSH key)
+git clone https://github.com/wiltonssp/mini-projeto-t2-crise-viagem.git
 ```
 
 ## Estrutura de Configuração

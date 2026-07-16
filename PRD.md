@@ -2,6 +2,8 @@
 
 ## Viagem Inteligente — Gestão Automatizada de Crises em Itinerários
 
+> **Repositório:** [https://github.com/wiltonssp/mini-projeto-t2-crise-viagem](https://github.com/wiltonssp/mini-projeto-t2-crise-viagem)
+
 ---
 
 ## 1. Resumo Executivo
@@ -14,6 +16,7 @@
 | **Autor** | Wilton Pereira |
 | **Data** | Julho/2025 |
 | **Status** | Implementado |
+| **Repositório** | [github.com/wiltonssp/mini-projeto-t2-crise-viagem](https://github.com/wiltonssp/mini-projeto-t2-crise-viagem) |
 
 ## 2. Declaração do Problema
 
@@ -55,83 +58,91 @@ Desenvolver um agente conversacional inteligente que responde em segundos, conso
 
 ### RF-01: Validação de Entrada
 
-| ID | Requisito | Prioridade |
-|----|-----------|------------|
-| RF-01.1 | Extrair código de reserva (6 chars A-Z0-9) da mensagem | Must |
-| RF-01.2 | Validar tamanho da mensagem (10-2000 caracteres) | Must |
-| RF-01.3 | Verificar domínio (palavras-chave de viagem) | Must |
-| RF-01.4 | Rejeitar palavras comuns de 6 letras como código falso | Must |
-| RF-01.5 | Retornar mensagem amigável quando validação falha | Must |
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-01.1 | Extrair código de reserva (6 chars A-Z0-9) da mensagem | Must | ✅ Implementado |
+| RF-01.2 | Validar tamanho da mensagem (10-2000 caracteres) | Must | ✅ Implementado |
+| RF-01.3 | Verificar domínio (palavras-chave de viagem) | Must | ✅ Implementado |
+| RF-01.4 | Rejeitar palavras comuns de 6 letras como código falso | Must | ✅ Implementado |
+| RF-01.5 | Retornar mensagem amigável quando validação falha | Must | ✅ Implementado |
 
 ### RF-02: Consulta de Status de Voo
 
-| ID | Requisito | Prioridade |
-|----|-----------|------------|
-| RF-02.1 | Consultar voo por código de reserva | Must |
-| RF-02.2 | Retornar: número, origem, destino, horários, status, motivo | Must |
-| RF-02.3 | Informar quando reserva não é encontrada | Must |
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-02.1 | Consultar voo por código de reserva | Must | ✅ Implementado |
+| RF-02.2 | Retornar: número, origem, destino, horários, status, motivo | Must | ✅ Implementado |
+| RF-02.3 | Informar quando reserva não é encontrada | Must | ✅ Implementado |
 
 ### RF-03: Consulta Climática
 
-| ID | Requisito | Prioridade |
-|----|-----------|------------|
-| RF-03.1 | Consultar clima no aeroporto de destino (API Open-Meteo) | Must |
-| RF-03.2 | Retornar: temperatura, condição, vento, visibilidade | Must |
-| RF-03.3 | Detectar e alertar condições adversas (tempestade, neblina, ventos fortes) | Must |
-| RF-03.4 | Permitir consulta por nome de cidade sem código de reserva | Should |
-| RF-03.5 | Usar destino da memória quando usuário menciona "destino" | Should |
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-03.1 | Consultar clima no aeroporto de destino (API Open-Meteo) | Must | ✅ Implementado |
+| RF-03.2 | Retornar: temperatura, condição, vento, visibilidade | Must | ✅ Implementado |
+| RF-03.3 | Detectar e alertar condições adversas (tempestade, neblina, ventos fortes) | Must | ✅ Implementado |
+| RF-03.4 | Permitir consulta por nome de cidade sem código de reserva | Should | ✅ Implementado |
+| RF-03.5 | Usar destino da memória quando usuário menciona "destino" | Should | ✅ Implementado |
 
 ### RF-04: Transporte Alternativo
 
-| ID | Requisito | Prioridade |
-|----|-----------|------------|
-| RF-04.1 | Buscar opções entre origem e destino (voo, ônibus, trem) | Must |
-| RF-04.2 | Ordenar por duração de viagem | Must |
-| RF-04.3 | Limitar a 10 opções no máximo | Should |
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-04.1 | Buscar opções entre origem e destino (voo, ônibus, trem) | Must | ✅ Implementado |
+| RF-04.2 | Ordenar por duração de viagem | Must | ✅ Implementado |
+| RF-04.3 | Limitar a 10 opções no máximo | Should | ✅ Implementado |
 
 ### RF-05: Recuperação de Políticas (RAG)
 
-| ID | Requisito | Prioridade |
-|----|-----------|------------|
-| RF-05.1 | Manter base de 10 documentos sobre ANAC 400/2016 | Must |
-| RF-05.2 | Busca semântica TF-IDF com similaridade cosseno | Must |
-| RF-05.3 | Retornar top-5 documentos mais relevantes | Must |
-| RF-05.4 | Separar políticas de empresa e direitos do passageiro | Should |
-| RF-05.5 | Limiar configurável de relevância (default: 0.1) | Should |
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-05.1 | Manter base de 10 documentos sobre ANAC 400/2016 | Must | ✅ Implementado |
+| RF-05.2 | Busca semântica TF-IDF com similaridade cosseno | Must | ✅ Implementado |
+| RF-05.3 | Retornar top-5 documentos mais relevantes | Must | ✅ Implementado |
+| RF-05.4 | Separar políticas de empresa e direitos do passageiro | Should | ✅ Implementado |
+| RF-05.5 | Limiar configurável de relevância (default: 0.1) | Should | ✅ Implementado |
 
 ### RF-06: Geração do Plano de Contingência
 
-| ID | Requisito | Prioridade |
-|----|-----------|------------|
-| RF-06.1 | Gerar plano com 5 seções obrigatórias em Markdown | Must |
-| RF-06.2 | Referenciar dados específicos do viajante em ≥3 seções | Must |
-| RF-06.3 | Indicar seções com dados indisponíveis | Must |
-| RF-06.4 | Usar linguagem clara, sem jargão (≤30 palavras/frase) | Should |
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-06.1 | Gerar plano com 5 seções obrigatórias em Markdown | Must | ✅ Implementado |
+| RF-06.2 | Referenciar dados específicos do viajante em ≥3 seções | Must | ✅ Implementado |
+| RF-06.3 | Indicar seções com dados indisponíveis | Must | ✅ Implementado |
+| RF-06.4 | Usar linguagem clara, sem jargão (≤30 palavras/frase) | Should | ✅ Implementado |
 
 ### RF-07: Detecção de Intenção
 
-| ID | Requisito | Prioridade |
-|----|-----------|------------|
-| RF-07.1 | Distinguir pergunta simples de situação de crise | Must |
-| RF-07.2 | Responder direto para perguntas informativas (hora, data, clima) | Must |
-| RF-07.3 | Gerar plano completo apenas para crises | Must |
-| RF-07.4 | Solicitar código quando pergunta sobre voo sem código | Must |
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-07.1 | Distinguir pergunta simples de situação de crise | Must | ✅ Implementado |
+| RF-07.2 | Responder direto para perguntas informativas (hora, data, clima) | Must | ✅ Implementado |
+| RF-07.3 | Gerar plano completo apenas para crises | Must | ✅ Implementado |
+| RF-07.4 | Solicitar código quando pergunta sobre voo sem código | Must | ✅ Implementado |
 
 ### RF-08: Memória de Sessão
 
-| ID | Requisito | Prioridade |
-|----|-----------|------------|
-| RF-08.1 | Persistir código de reserva entre interações da mesma sessão | Must |
-| RF-08.2 | Persistir destino para consultas de clima subsequentes | Must |
-| RF-08.3 | Usar MemorySaver com thread_id fixo por sessão | Must |
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-08.1 | Persistir código de reserva entre interações da mesma sessão | Must | ✅ Implementado |
+| RF-08.2 | Persistir destino para consultas de clima subsequentes | Must | ✅ Implementado |
+| RF-08.3 | Usar MemorySaver com thread_id fixo por sessão | Must | ✅ Implementado |
 
 ### RF-09: Interfaces
 
-| ID | Requisito | Prioridade |
-|----|-----------|------------|
-| RF-09.1 | Interface web com Gradio (ChatInterface) | Must |
-| RF-09.2 | Interface CLI para execução via terminal | Must |
-| RF-09.3 | Exemplos de uso na interface web | Should |
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-09.1 | Interface web com Gradio (ChatInterface) | Must | ✅ Implementado |
+| RF-09.2 | Interface CLI para execução via terminal | Must | ✅ Implementado |
+| RF-09.3 | Exemplos de uso na interface web | Should | ✅ Implementado |
+
+### RF-10: CI/CD
+
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-10.1 | Pipeline de lint automatizado (ruff) | Should | ✅ Implementado |
+| RF-10.2 | Testes unitários com cobertura mínima de 70% | Should | ✅ Implementado |
+| RF-10.3 | Validação de documentação no pipeline | Should | ✅ Implementado |
 
 ## 6. Requisitos Não-Funcionais
 
@@ -169,6 +180,15 @@ Desenvolver um agente conversacional inteligente que responde em segundos, conso
 | RNF-04.2 | Exemplos de uso na interface |
 | RNF-04.3 | Resposta em português do Brasil |
 
+### RNF-05: Qualidade de Código
+
+| ID | Requisito |
+|----|-----------|
+| RNF-05.1 | Linter ruff sem erros no código-fonte |
+| RNF-05.2 | Testes unitários cobrindo ≥70% do código |
+| RNF-05.3 | Documentação completa (README, PRD, product, INSTALLATION) |
+| RNF-05.4 | Código modular com separação de responsabilidades |
+
 ## 7. Escopo e Limitações Conhecidas
 
 ### Dentro do Escopo (v1.0)
@@ -179,6 +199,7 @@ Desenvolver um agente conversacional inteligente que responde em segundos, conso
 - 10 documentos de políticas/legislação
 - Sessão única em memória (sem persistência)
 - Interface web e CLI
+- Pipeline CI/CD com GitHub Actions
 
 ### Fora do Escopo (v1.0)
 
@@ -191,14 +212,15 @@ Desenvolver um agente conversacional inteligente que responde em segundos, conso
 
 ## 8. Métricas de Sucesso
 
-| Métrica | Critério de Aceite |
-|---------|-------------------|
-| Validação de entrada | Rejeita inputs inválidos corretamente |
-| Detecção de intenção | Classifica crise vs. pergunta simples com acurácia |
-| Memória de sessão | Reutiliza código de reserva sem re-solicitar |
-| Resiliência | Gera plano mesmo com falha parcial de fontes |
-| Tempo de resposta | Plano completo em < 15s com LLM remoto |
-| Cobertura RAG | Recupera documentos relevantes para cenários de crise |
+| Métrica | Critério de Aceite | Status |
+|---------|-------------------|--------|
+| Validação de entrada | Rejeita inputs inválidos corretamente | ✅ |
+| Detecção de intenção | Classifica crise vs. pergunta simples com acurácia | ✅ |
+| Memória de sessão | Reutiliza código de reserva sem re-solicitar | ✅ |
+| Resiliência | Gera plano mesmo com falha parcial de fontes | ✅ |
+| Tempo de resposta | Plano completo em < 15s com LLM remoto | ✅ |
+| Cobertura RAG | Recupera documentos relevantes para cenários de crise | ✅ |
+| Cobertura de testes | ≥70% do código-fonte coberto | ✅ |
 
 ## 9. Dependências Externas
 
@@ -206,6 +228,7 @@ Desenvolver um agente conversacional inteligente que responde em segundos, conso
 |---------|------|---------------------|----------|
 | Groq API | LLM remoto | Alta (free tier limitado) | Erro informado ao usuário |
 | Open-Meteo | Clima | Alta (API pública) | Seção de clima marcada como indisponível |
+| GitHub Actions | CI/CD | Alta | Execução local de lint e testes |
 
 ## 10. Cronograma
 
@@ -218,4 +241,4 @@ Desenvolver um agente conversacional inteligente que responde em segundos, conso
 | Fase 5 | Detecção de intenção + resposta direta | ✅ Concluído |
 | Fase 6 | Memória de sessão | ✅ Concluído |
 | Fase 7 | Interfaces (Gradio + CLI) | ✅ Concluído |
-| Fase 8 | Testes e documentação | ✅ Concluído |
+| Fase 8 | Testes, CI/CD e documentação | ✅ Concluído |
