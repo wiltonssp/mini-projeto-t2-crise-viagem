@@ -9,4 +9,4 @@ numpy>=1.24
 
 # Dependências de teste
 pytest>=7.0
-hypothesis>=6.0
+pytest-cov>=4.0
