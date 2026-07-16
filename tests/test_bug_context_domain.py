@@ -13,7 +13,6 @@ Bug conditions:
 Validates: Requirements 1.1, 1.2, 1.3, 2.1, 2.2, 2.3
 """
 
-import pytest
 from langchain_core.messages import HumanMessage
 
 from src.agente import validacao_node

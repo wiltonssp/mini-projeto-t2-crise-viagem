@@ -9,7 +9,6 @@ from src.validacao import (
     validar_codigo_reserva,
     validar_mensagem,
     verificar_dominio,
-    PALAVRAS_CHAVE_DOMINIO,
 )
 
 

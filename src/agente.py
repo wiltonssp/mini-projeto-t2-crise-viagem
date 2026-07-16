@@ -561,7 +561,7 @@ def gerar_plano_node(state: EstadoCrise) -> dict:
         politicas = state.get("politicas_recuperadas", [])
         direitos = state.get("direitos_passageiro", [])
         mensagem_usuario = state.get("mensagem_usuario", "")
-        erros = state.get("erros", [])
+        _ = state.get("erros", [])
 
         # Verificar se é uma pergunta simples ou uma situação de crise
         if _eh_pergunta_simples(mensagem_usuario):

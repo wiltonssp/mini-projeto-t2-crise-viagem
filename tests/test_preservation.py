@@ -9,7 +9,7 @@ They must PASS on the current code to confirm baseline behavior to preserve.
 
 import sys
 import os
-import string
+
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -22,7 +22,6 @@ from src.validacao import (
     validar_codigo_reserva,
     validar_mensagem,
     verificar_dominio,
-    PALAVRAS_CHAVE_DOMINIO,
 )
 from src.agente import validacao_node
 
