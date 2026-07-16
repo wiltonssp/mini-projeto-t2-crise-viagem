@@ -8,12 +8,10 @@ from src.ferramentas.clima import (
     _mapear_condicao,
     _detectar_condicoes_adversas,
     _formatar_clima,
-    COORDENADAS,
 )
 from src.ferramentas.transporte import (
     consultar_transporte_alternativo,
     _duracao_para_minutos,
-    ROTAS_DB,
 )
 
 
