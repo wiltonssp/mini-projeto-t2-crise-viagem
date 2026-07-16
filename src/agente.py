@@ -266,6 +266,9 @@ def validacao_node(state: EstadoCrise) -> dict:
     codigo = _extrair_codigo_reserva(texto_usuario)
     mensagem = _extrair_mensagem(texto_usuario, codigo) if codigo else texto_usuario
 
+    # Flag para indicar que o código veio da memória (sessão anterior)
+    codigo_da_memoria = False
+
     # Validar código de reserva
     codigo_valido, erro_codigo = validar_codigo_reserva(codigo)
     if not codigo_valido:
@@ -278,6 +281,7 @@ def validacao_node(state: EstadoCrise) -> dict:
                 codigo = codigo_anterior
                 mensagem = texto_usuario
                 codigo_valido = True
+                codigo_da_memoria = True
 
     if not codigo_valido:
         # Se é uma pergunta sobre voo e não tem código válido nem na memória, pedir
@@ -314,16 +318,17 @@ def validacao_node(state: EstadoCrise) -> dict:
             "mensagem_usuario": mensagem,
         }
 
-    # Verificar domínio
-    dominio_ok, erro_dominio = verificar_dominio(mensagem)
-    if not dominio_ok:
-        erros.append({"nó": "validacao", "erro": erro_dominio})
-        return {
-            "validacao_ok": False,
-            "erros": erros,
-            "codigo_reserva": codigo,
-            "mensagem_usuario": mensagem,
-        }
+    # Verificar domínio - SKIP quando código vem da memória (contexto de sessão já estabelecido)
+    if not codigo_da_memoria:
+        dominio_ok, erro_dominio = verificar_dominio(mensagem)
+        if not dominio_ok:
+            erros.append({"nó": "validacao", "erro": erro_dominio})
+            return {
+                "validacao_ok": False,
+                "erros": erros,
+                "codigo_reserva": codigo,
+                "mensagem_usuario": mensagem,
+            }
 
     return {
         "validacao_ok": True,

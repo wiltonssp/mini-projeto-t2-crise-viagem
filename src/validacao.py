@@ -52,11 +52,20 @@ def validar_mensagem(mensagem: str) -> tuple[bool, str]:
 
 # Palavras-chave do domínio de crises em itinerários de viagem
 PALAVRAS_CHAVE_DOMINIO = [
+    # Original keywords
     "viagem", "voo", "aeroporto", "conexão", "conexao",
     "itinerário", "itinerario", "reserva", "bagagem",
     "transporte", "clima", "cancelado", "cancelamento",
     "atraso", "atrasado", "embarque", "escala", "mala",
     "passagem", "passageiro", "companhia", "aerea", "aérea",
+    # Verb infinitives
+    "cancelar", "atrasar", "embarcar", "decolar", "pousar", "voar", "viajar", "reservar",
+    # Common typos
+    "atrazar", "cancela", "atrazado", "atrazei",
+    # Gerunds
+    "viajando", "embarcando", "decolando",
+    # Urgency words
+    "perdi", "perdido", "perdida",
 ]
 
 
