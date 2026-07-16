@@ -1,5 +1,7 @@
 # Visão do Produto — Viagem Inteligente
 
+> **Repositório:** [https://github.com/wiltonssp/mini-projeto-t2-crise-viagem](https://github.com/wiltonssp/mini-projeto-t2-crise-viagem)
+
 ## Identidade
 
 | Campo | Valor |
@@ -10,6 +12,7 @@
 | **Domínio** | Aviação / Turismo / Atendimento ao Passageiro |
 | **Plataforma** | Web (Gradio) + CLI |
 | **Idioma** | Português do Brasil |
+| **Repositório** | [github.com/wiltonssp/mini-projeto-t2-crise-viagem](https://github.com/wiltonssp/mini-projeto-t2-crise-viagem) |
 
 ## Proposta de Valor
 
@@ -55,6 +58,7 @@ Tornar-se a referência em assistência automatizada ao viajante em crise, integ
 | **Detecção inteligente** | Regex determina resposta direta vs. plano completo (sem custo LLM) |
 | **RAG leve** | TF-IDF + cosseno — zero dependência de embeddings externos |
 | **Resiliência** | Try/except por nó — falha parcial nunca bloqueia o fluxo |
+| **CI/CD** | GitHub Actions com lint, testes e validação de documentação |
 
 ## Fluxos de Uso
 
@@ -117,7 +121,7 @@ Mensagem 3: "quais meus direitos?" → usa ABC123 da memória
 
 ## Roadmap
 
-### v1.0 — MVP ✅ (Atual)
+### v1.0 — MVP (Atual)
 
 - [x] Fluxo completo com 8 nós LangGraph
 - [x] Ferramentas: voo (simulado), clima (real), transporte (simulado)
@@ -127,6 +131,8 @@ Mensagem 3: "quais meus direitos?" → usa ABC123 da memória
 - [x] Memória de sessão (MemorySaver)
 - [x] Interface web (Gradio) + CLI
 - [x] Consulta de clima por cidade sem código
+- [x] Pipeline CI/CD com GitHub Actions
+- [x] Documentação completa (README, PRD, product, INSTALLATION)
 
 ### v1.1 — Melhorias de UX (Planejado)
 
@@ -160,6 +166,7 @@ Mensagem 3: "quais meus direitos?" → usa ABC123 da memória
 | Taxa de validação | % de inputs que passam na validação | > 80% (inputs válidos) |
 | Cobertura RAG | % de cenários com documentos relevantes recuperados | > 90% |
 | Resiliência | % de execuções que entregam resposta mesmo com falha parcial | 100% |
+| Cobertura de testes | % do código-fonte coberto por testes unitários | ≥ 70% |
 | Satisfação (qualitativa) | Plano gerado é acionável e personalizado | Avaliação manual |
 
 ## Glossário
@@ -173,3 +180,4 @@ Mensagem 3: "quais meus direitos?" → usa ABC123 da memória
 | **StateGraph** | Grafo de estados do LangGraph para orquestração de agentes |
 | **MemorySaver** | Checkpointer in-memory do LangGraph |
 | **DES** | Direitos Especiais de Saque (unidade monetária do FMI) |
+| **CI/CD** | Integração Contínua / Entrega Contínua |

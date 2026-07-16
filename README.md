@@ -5,6 +5,8 @@
 [![Groq](https://img.shields.io/badge/LLM-Groq%20Llama%203.3-orange.svg)](https://console.groq.com/)
 [![License: Academic](https://img.shields.io/badge/license-Academic-lightgrey.svg)](#licença)
 
+> **Repositório:** [https://github.com/wiltonssp/mini-projeto-t2-crise-viagem](https://github.com/wiltonssp/mini-projeto-t2-crise-viagem)
+
 ## Visão Geral
 
 Agente inteligente que automatiza a gestão de crises em itinerários de viagem, oferecendo respostas em segundos ao consolidar informações de múltiplas fontes e gerar planos de contingência personalizados.
@@ -29,8 +31,9 @@ Um agente conversacional que:
 ## Quick Start
 
 ```bash
-# 1. Clone e entre no diretório do projeto
-cd "Mini-Projeto"
+# 1. Clone o repositório
+git clone https://github.com/wiltonssp/mini-projeto-t2-crise-viagem.git
+cd mini-projeto-t2-crise-viagem
 
 # 2. Crie ambiente virtual
 python -m venv venv
@@ -138,7 +141,7 @@ ABC123 Meu voo foi cancelado por mau tempo e vou perder minha conexão para o Ri
 ```markdown
 ## 1. Diagnóstico da Situação
 - Voo LA3456 (GRU → GIG) cancelado por condições meteorológicas adversas.
-- Horário original: 15/01/2025 às 14h30.
+- Horário original: 15/07/2026 às 14h30.
 - Conexão para o Rio comprometida.
 
 ## 2. Direitos do Passageiro
@@ -169,7 +172,7 @@ ABC123 Meu voo foi cancelado por mau tempo e vou perder minha conexão para o Ri
 ## Estrutura do Projeto
 
 ```
-Mini-Projeto/
+mini-projeto-t2-crise-viagem/
 ├── src/
 │   ├── __init__.py
 │   ├── agente.py              # Agente principal com StateGraph (8 nós)
@@ -191,6 +194,9 @@ Mini-Projeto/
 ├── tests/                     # Testes unitários
 ├── docs/
 │   └── Prompts/              # System prompts documentados
+├── .github/
+│   └── workflows/
+│       └── ci.yml            # Pipeline CI (lint, test, docs)
 ├── .env.example              # Template de variáveis de ambiente
 ├── .gitignore
 ├── requirements.txt          # Dependências Python
@@ -198,7 +204,6 @@ Mini-Projeto/
 ├── INSTALLATION.md           # Guia detalhado de instalação
 ├── PRD.md                    # Product Requirements Document
 ├── product.md                # Visão do produto e roadmap
-├── Requisitos.docx           # Requisitos do projeto
 └── README.md                 # Este arquivo
 ```
 
@@ -216,6 +221,10 @@ Mini-Projeto/
 ### Detecção de intenção via regex (em vez de classificador ML)
 - Latência zero — decisão em código antes de chamar o LLM
 - Padrões bem definidos e testáveis para o escopo do projeto
+
+### Pipeline CI/CD
+- GitHub Actions com jobs de lint (ruff), testes (pytest com cobertura ≥70%) e validação de documentação
+- Deploy simulado após aprovação de todos os checks
 
 ## Limitações
 
@@ -246,6 +255,7 @@ DEF456 Estou no aeroporto de Brasília e meu voo atrasou mais de 4 horas.
 MNO345 Meu voo está cancelado por neblina e preciso chegar a Porto Alegre urgente.
 GHI789 qual a data e hora do meu voo?
 XYZ789 quais meus direitos por atraso?
+Previsão do tempo em Curitiba
 ```
 
 ## Testes
@@ -253,6 +263,9 @@ XYZ789 quais meus direitos por atraso?
 ```bash
 # Executar todos os testes
 pytest tests/ -v
+
+# Executar com cobertura
+pytest tests/ --cov=src --cov-report=term-missing -v
 
 # Executar teste específico
 pytest tests/test_validacao.py -v
@@ -263,8 +276,11 @@ pytest tests/test_validacao.py -v
 - [INSTALLATION.md](INSTALLATION.md) — Guia completo de instalação e configuração
 - [PRD.md](PRD.md) — Product Requirements Document
 - [product.md](product.md) — Visão do produto e roadmap
-- [Requisitos.docx](Requisitos.docx) — Requisitos do projeto
 - [docs/Prompts/](docs/Prompts/) — Prompts e decisões técnicas documentadas
+
+## Autor
+
+**Wilton Pereira** — [GitHub](https://github.com/wiltonssp)
 
 ## Licença
 
