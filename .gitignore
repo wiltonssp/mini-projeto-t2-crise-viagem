@@ -5,6 +5,12 @@
 __pycache__/
 *.pyc
 
+# Hypothesis (gerado automaticamente nos testes)
+.hypothesis/
+
+# Ruff cache
+.ruff_cache/
+
 # Ambientes virtuais
 .venv/
 venv/
