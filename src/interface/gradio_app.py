@@ -94,7 +94,8 @@ demo = gr.ChatInterface(
         "Informe seu código de reserva (6 caracteres, ex: ABC123) "
         "e descreva sua situação de viagem. O agente irá consultar o status do voo, "
         "condições climáticas, opções de transporte alternativo e seus direitos como "
-        "passageiro para gerar um plano de contingência personalizado."
+        "passageiro para gerar um plano de contingência personalizado.\n"
+        "Para teste utilize as reservas que estão mocadas (mock database) - ABC123, DEF456, GHI789, JKL012, MNO345, XYZ789"
     ),
     examples=[
         "ABC123 Meu voo foi cancelado por mau tempo e vou perder minha conexão para o Rio.",
