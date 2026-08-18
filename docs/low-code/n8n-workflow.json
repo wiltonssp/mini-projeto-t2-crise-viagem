@@ -1,0 +1,135 @@
+{
+  "name": "Viagem Inteligente - Alerta de Crise",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "alerta-crise-viagem",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:5000/webhook/alerta-voo",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ codigo_reserva: $json.body.codigo_reserva, mensagem: $json.body.mensagem, canal_resposta: 'discord' }) }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "node-agente",
+      "name": "Chamar Agente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-1",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "processado",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "node-if",
+      "name": "Verificar Sucesso",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "httpMethod": "POST",
+        "url": "={{ $env.DISCORD_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ content: '✈️ **Alerta de Crise - Viagem Inteligente**\\n\\n📋 Código: ' + $('Chamar Agente').item.json.codigo_reserva + '\\n⏱️ Latência: ' + $('Chamar Agente').item.json.latency_ms + 'ms\\n🔍 Trace: ' + $('Chamar Agente').item.json.trace_id + '\\n\\n' + $('Chamar Agente').item.json.plano_contingencia.substring(0, 1900), username: 'Viagem Inteligente Bot' }) }}",
+        "options": {}
+      },
+      "id": "node-discord",
+      "name": "Notificar Discord",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'notificado', trace_id: $('Chamar Agente').item.json.trace_id, canal: 'discord' }) }}"
+      },
+      "id": "node-response-ok",
+      "name": "Responder OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1130, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'erro', motivo: 'Falha ao processar alerta' }) }}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "node-response-erro",
+      "name": "Responder Erro",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [910, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [{ "node": "Chamar Agente", "type": "main", "index": 0 }]
+      ]
+    },
+    "Chamar Agente": {
+      "main": [
+        [{ "node": "Verificar Sucesso", "type": "main", "index": 0 }]
+      ]
+    },
+    "Verificar Sucesso": {
+      "main": [
+        [{ "node": "Notificar Discord", "type": "main", "index": 0 }],
+        [{ "node": "Responder Erro", "type": "main", "index": 0 }]
+      ]
+    },
+    "Notificar Discord": {
+      "main": [
+        [{ "node": "Responder OK", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateId": "viagem-inteligente-crise",
+    "description": "Fluxo low-code que integra o agente Viagem Inteligente com Discord para notificações automáticas de crises em itinerários de viagem."
+  }
+}

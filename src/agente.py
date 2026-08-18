@@ -17,6 +17,11 @@ from src.estado import EstadoCrise
 from src.ferramentas.clima import consultar_clima
 from src.ferramentas.transporte import consultar_transporte_alternativo
 from src.ferramentas.voo import consultar_status_voo
+from src.governanca import (
+    detectar_prompt_injection,
+    gerar_resposta_bloqueio,
+    sanitizar_entrada,
+)
 from src.rag.busca import BuscaSemantica
 from src.rag.documentos import DOCUMENTOS_POLITICAS
 from src.validacao import validar_codigo_reserva, validar_mensagem, verificar_dominio
@@ -24,7 +29,7 @@ from src.validacao import validar_codigo_reserva, validar_mensagem, verificar_do
 
 def _get_llm():
     """Retorna instância do ChatGroq (lazy-loaded para permitir dotenv)."""
-    return ChatGroq(model="llama-3.3-70b-versatile", temperature=0.3)
+    return ChatGroq(model="openai/gpt-oss-120b", temperature=0.3)
 
 
 # ---------------------------------------------------------------------------
@@ -131,12 +136,15 @@ def _eh_consulta_clima_direta(texto: str) -> tuple[bool, str]:
 
     # Verificar se é uma pergunta sobre clima/tempo/previsão
     padroes_clima = [
-        r"previs[aã]o\s+(do|de)\s+tempo",
+        r"previs[aã]o\s+(do|de|para\s+o|para)?\s*tempo",
+        r"previs[aã]o\s+(do|de)?\s*tempo",
         r"como\s+(est[aá]|ta)\s+(o\s+)?(clima|tempo)",
-        r"clima\s+(em|no|na|de|do)",
-        r"tempo\s+(em|no|na|de|do)",
-        r"temperatura\s+(em|no|na|de|do)",
+        r"clima\s+(em|no|na|de|do|para)",
+        r"tempo\s+(em|no|na|de|do|para)",
+        r"temperatura\s+(em|no|na|de|do|para)",
         r"condi[çc][oõ]es?\s+(clim[aá]tica|meteorol[oó]gica)",
+        r"qual\s+(a|o)?\s*previs[aã]o",
+        r"previs[aã]o.*(tempo|clima)",
     ]
 
     eh_clima = any(re.search(p, texto_lower) for p in padroes_clima)
@@ -211,6 +219,18 @@ def validacao_node(state: EstadoCrise) -> dict:
             "validacao_ok": False,
             "erros": [{"nó": "validacao", "erro": "Nenhuma mensagem do usuário encontrada."}],
         }
+
+    # SEGURANÇA: Detectar prompt injection antes de qualquer processamento
+    is_injection, motivo_injection = detectar_prompt_injection(texto_usuario)
+    if is_injection:
+        return {
+            "validacao_ok": False,
+            "erros": [{"nó": "governanca", "erro": motivo_injection}],
+            "relatorio_final": gerar_resposta_bloqueio(),
+        }
+
+    # Sanitizar entrada (remove tokens de controle de LLM)
+    texto_usuario = sanitizar_entrada(texto_usuario)
 
     # Verificar se é uma consulta de clima direta (sem código de reserva)
     eh_clima_direta, aeroporto_clima = _eh_consulta_clima_direta(texto_usuario)
@@ -339,12 +359,18 @@ def validacao_node(state: EstadoCrise) -> dict:
         "codigo_reserva": codigo,
         "mensagem_usuario": mensagem,
         "erros": [],
+        "status_voo": {},  # Limpar status_voo anterior para nova consulta
     }
 
 
 def consulta_voo_node(state: EstadoCrise) -> dict:
     """Nó de consulta de voo: consulta status pelo código de reserva."""
     try:
+        # Se é consulta de clima direta, não sobrescrever status_voo
+        status_voo = state.get("status_voo", {})
+        if status_voo.get("status") == "consulta_clima_direta":
+            return {}
+
         codigo = state.get("codigo_reserva", "")
         # Se não há código de reserva (ex: consulta de clima direta), pular
         if not codigo:
@@ -354,7 +380,7 @@ def consulta_voo_node(state: EstadoCrise) -> dict:
         return {"status_voo": dados_voo}
     except Exception as e:
         return {
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "consulta_voo", "erro": str(e), "tipo": type(e).__name__}
             ]
         }
@@ -374,7 +400,7 @@ def consulta_clima_node(state: EstadoCrise) -> dict:
         return {"info_clima": dados_clima}
     except Exception as e:
         return {
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "consulta_clima", "erro": str(e), "tipo": type(e).__name__}
             ]
         }
@@ -397,7 +423,7 @@ def consulta_transporte_node(state: EstadoCrise) -> dict:
         return {"alternativas_transporte": opcoes}
     except Exception as e:
         return {
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "consulta_transporte", "erro": str(e), "tipo": type(e).__name__}
             ]
         }
@@ -442,7 +468,7 @@ def rag_node(state: EstadoCrise) -> dict:
         }
     except Exception as e:
         return {
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "rag", "erro": str(e), "tipo": type(e).__name__}
             ]
         }
@@ -489,7 +515,7 @@ def analise_llm_node(state: EstadoCrise) -> dict:
         }
     except Exception as e:
         return {
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "analise_llm", "erro": str(e), "tipo": type(e).__name__}
             ]
         }
@@ -573,7 +599,14 @@ def gerar_plano_node(state: EstadoCrise) -> dict:
         _ = state.get("erros", [])
 
         # Verificar se é uma pergunta simples ou uma situação de crise
-        if _eh_pergunta_simples(mensagem_usuario):
+        # Se o voo está cancelado/atrasado, SEMPRE gerar plano completo
+        # (o passageiro precisa de orientação mesmo que pergunte apenas o status)
+        # EXCEÇÃO: consultas de clima diretas sempre retornam resposta direta
+        status_atual = status_voo.get("status", "").lower()
+        eh_clima_direta = status_atual == "consulta_clima_direta"
+        voo_em_crise = status_atual in ("cancelado", "atrasado", "desviado") and not eh_clima_direta
+
+        if eh_clima_direta or (_eh_pergunta_simples(mensagem_usuario) and not voo_em_crise):
             return _gerar_resposta_direta(state)
 
         # --- MODO PLANO COMPLETO (situação de crise) ---
@@ -657,7 +690,7 @@ def gerar_plano_node(state: EstadoCrise) -> dict:
         )
         return {
             "relatorio_final": erro_msg,
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "gerar_plano", "erro": str(e), "tipo": type(e).__name__}
             ],
         }
@@ -717,7 +750,7 @@ def _gerar_resposta_direta(state: EstadoCrise) -> dict:
         erro_msg = f"Não foi possível processar sua pergunta. Motivo: {str(e)}"
         return {
             "relatorio_final": erro_msg,
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "gerar_plano", "erro": str(e), "tipo": type(e).__name__}
             ],
         }
@@ -789,9 +822,11 @@ def build_graph():
     # Aresta condicional: validação → consulta_voo (ok) ou erro (falha)
     graph.add_conditional_edges("validacao", roteador_validacao)
 
-    # Arestas sequenciais do fluxo principal
+    # Paralelização: consulta_clima e consulta_transporte executam em paralelo
+    # após consulta_voo (fan-out) e convergem antes do rag (fan-in)
     graph.add_edge("consulta_voo", "consulta_clima")
-    graph.add_edge("consulta_clima", "consulta_transporte")
+    graph.add_edge("consulta_voo", "consulta_transporte")
+    graph.add_edge("consulta_clima", "rag")
     graph.add_edge("consulta_transporte", "rag")
     graph.add_edge("rag", "analise_llm")
     graph.add_edge("analise_llm", "gerar_plano")

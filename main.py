@@ -4,7 +4,8 @@ Entry point do Agente de Gestão de Crises em Itinerários de Viagem.
 Responsável por:
 - Carregar variáveis de ambiente via dotenv
 - Validar presença de GROQ_API_KEY antes de qualquer chamada a API
-- Selecionar interface (web ou cli) com base em argumento de linha de comando
+- Selecionar interface (web, cli, dashboard) com base em argumento de linha de comando
+- Iniciar monitoramento proativo (v2.0)
 """
 
 import sys
@@ -28,27 +29,92 @@ def validar_variaveis_ambiente():
         sys.exit(1)
 
 
+def _mostrar_info_inicializacao():
+    """Exibe informações sobre providers e configurações ativas."""
+    print("\n✈️  Viagem Inteligente — Gestão de Crises em Itinerários")
+    print("=" * 60)
+
+    # Verificar providers de aviação
+    from src.ferramentas.voo_api import get_aviation_service
+    aviation = get_aviation_service()
+    print(f"   Providers de voo: {', '.join(aviation.providers_ativos)}")
+
+    # Verificar messaging
+    from src.interface.messaging import get_servico_mensageria
+    msg = get_servico_mensageria()
+    canais = msg.canais_disponiveis
+    if canais:
+        print(f"   Canais de mensageria: {', '.join(canais)}")
+    else:
+        print("   Canais de mensageria: nenhum configurado")
+
+    # Verificar embeddings
+    try:
+        from src.rag.embeddings import _SENTENCE_TRANSFORMERS_DISPONIVEL
+        if _SENTENCE_TRANSFORMERS_DISPONIVEL:
+            print("   RAG: Sentence Transformers (embeddings densos)")
+        else:
+            print("   RAG: TF-IDF (fallback)")
+    except ImportError:
+        print("   RAG: TF-IDF (padrão)")
+
+    # Verificar aeroportos
+    from src.ferramentas.aeroportos import total_aeroportos
+    print(f"   Aeroportos IATA: {total_aeroportos()} cadastrados")
+
+    print("=" * 60)
+
+
 def main():
     """Função principal que valida ambiente e inicia a interface selecionada."""
     # Validar variáveis de ambiente antes de qualquer operação
     validar_variaveis_ambiente()
 
-    # Determinar modo de execução: 'cli' ou 'web' (default)
+    # Determinar modo de execução: 'cli', 'web' (default), 'dashboard'
     modo = sys.argv[1] if len(sys.argv) > 1 else "web"
 
     if modo == "cli":
         from src.interface.cli import executar_cli
         executar_cli()
+
     elif modo == "web":
+        _mostrar_info_inicializacao()
+
+        # Iniciar monitoramento proativo em background (v2.0)
+        try:
+            from src.notificacoes import iniciar_monitoramento
+            iniciar_monitoramento()
+            print("   Monitor de voos: ativo (verificação a cada 5min)")
+        except Exception as e:
+            print(f"   Monitor de voos: desativado ({e})")
+
         from src.interface.gradio_app import demo
-        print("\n✈️ Agente de Gestão de Crises — Itinerários de Viagem")
-        print("   Acesse: http://localhost:7860\n")
+        print(f"\n   Acesse: http://localhost:7860\n")
         demo.launch(server_name="127.0.0.1", server_port=7860)
+
+    elif modo == "dashboard":
+        _mostrar_info_inicializacao()
+        from src.interface.dashboard import dashboard_app
+        print(f"\n   Dashboard: http://localhost:7861\n")
+        dashboard_app.launch(server_name="127.0.0.1", server_port=7861)
+
+    elif modo == "webhook":
+        _mostrar_info_inicializacao()
+        from src.webhook import iniciar_webhook
+        print("\n   Webhook para integração low-code (n8n, Make, Zapier)")
+        print("   Endpoints:")
+        print("     POST /webhook/alerta-voo  — Processar alerta de crise")
+        print("     GET  /webhook/health      — Health check")
+        print("     GET  /webhook/metricas    — Métricas de observabilidade\n")
+        iniciar_webhook(port=5000, background=False)
+
     else:
         print(f"ERRO: Modo '{modo}' não reconhecido.")
-        print("Uso: python main.py [web|cli]")
-        print("  web  - Inicia interface Gradio (padrão)")
-        print("  cli  - Executa via linha de comando")
+        print("Uso: python main.py [web|cli|dashboard|webhook]")
+        print("  web       - Inicia interface Gradio (padrão)")
+        print("  cli       - Executa via linha de comando")
+        print("  dashboard - Inicia dashboard de analytics")
+        print("  webhook   - Inicia endpoint para integração low-code")
         sys.exit(1)
 
 
