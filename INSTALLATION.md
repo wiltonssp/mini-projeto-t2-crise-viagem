@@ -175,7 +175,9 @@ python main.py dashboard
 
 Acesse: **http://localhost:7861**
 
-O dashboard mostra: sessões, interações, tempo de resposta, feedback e eventos por tipo.
+O dashboard possui duas abas:
+- **📈 Analytics** — sessões, interações, tempo de resposta, feedback e eventos por tipo
+- **🔍 Observabilidade** — traces recentes, detecção de anomalias, investigação de execução por trace_id e logs estruturados
 
 ## Passo 6: Executar Testes
 
