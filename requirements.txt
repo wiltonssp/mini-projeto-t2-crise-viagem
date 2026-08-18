@@ -1,3 +1,4 @@
+# === Dependências Core (v1.0) ===
 langgraph>=0.2
 langchain-groq>=0.2
 langchain-core>=0.3
@@ -7,6 +8,19 @@ requests>=2.31
 scikit-learn>=1.3
 numpy>=1.24
 
-# Dependências de teste
+# === v1.1 — Melhorias de UX ===
+# SQLite já incluído na stdlib do Python (não requer pacote extra)
+
+# === v2.0 — Integração Real ===
+# Embeddings semânticos (opcional — fallback para TF-IDF se não instalado)
+sentence-transformers>=2.2; python_version>="3.9"
+
+# Integração WhatsApp (opcional — apenas se TWILIO configurado)
+twilio>=8.0; python_version>="3.9"
+
+# === v3.0 — Plataforma ===
+# Todas as dependências v3.0 usam stdlib ou pacotes já listados acima
+
+# === Dependências de teste ===
 pytest>=7.0
 pytest-cov>=4.0

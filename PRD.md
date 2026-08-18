@@ -11,11 +11,11 @@
 | Campo | Descrição |
 |-------|-----------|
 | **Produto** | Agente de Gestão de Crises em Itinerários de Viagem |
-| **Versão** | 1.0.0 |
+| **Versão** | 3.0.0 |
 | **Contexto** | Mini-Projeto — Módulo 2 do Curso de IA SCTEC |
 | **Autor** | Wilton Pereira |
-| **Data** | Julho/2025 |
-| **Status** | Implementado |
+| **Data** | Agosto/2026 |
+| **Status** | Implementado (v1.0 a v3.0) |
 | **Repositório** | [github.com/wiltonssp/mini-projeto-t2-crise-viagem](https://github.com/wiltonssp/mini-projeto-t2-crise-viagem) |
 
 ## 2. Declaração do Problema
@@ -144,6 +144,40 @@ Desenvolver um agente conversacional inteligente que responde em segundos, conso
 | RF-10.2 | Testes unitários com cobertura mínima de 70% | Should | ✅ Implementado |
 | RF-10.3 | Validação de documentação no pipeline | Should | ✅ Implementado |
 
+### RF-11: Multi-Sessão e Persistência (v1.1)
+
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-11.1 | Thread_id único por sessão de navegador | Must | ✅ Implementado |
+| RF-11.2 | Histórico de mensagens persistido em SQLite | Must | ✅ Implementado |
+| RF-11.3 | Isolamento de memória entre sessões simultâneas | Must | ✅ Implementado |
+| RF-11.4 | Confirmação pós-atendimento em toda resposta | Should | ✅ Implementado |
+| RF-11.5 | Visualização da arquitetura do grafo na interface | Should | ✅ Implementado |
+
+### RF-12: Integrações Reais (v2.0)
+
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-12.1 | Adapter para FlightAware com fallback simulado | Should | ✅ Implementado |
+| RF-12.2 | Adapter para Amadeus com fallback simulado | Should | ✅ Implementado |
+| RF-12.3 | Embeddings semânticos (Sentence Transformers) | Should | ✅ Implementado |
+| RF-12.4 | Base multilíngue PT/EN/ES | Should | ✅ Implementado |
+| RF-12.5 | Notificações proativas de mudança de status | Should | ✅ Implementado |
+| RF-12.6 | Integração WhatsApp via Twilio | Could | ✅ Implementado |
+| RF-12.7 | Integração Telegram via Bot API | Could | ✅ Implementado |
+| RF-12.8 | Autenticação com login/registro | Could | ✅ Implementado |
+
+### RF-13: Plataforma (v3.0)
+
+| ID | Requisito | Prioridade | Status |
+|----|-----------|------------|--------|
+| RF-13.1 | Multi-tenant com planos escalonados | Could | ✅ Implementado |
+| RF-13.2 | Dashboard de analytics com métricas | Could | ✅ Implementado |
+| RF-13.3 | Feedback loop com categorização automática | Could | ✅ Implementado |
+| RF-13.4 | Export de dataset para fine-tuning (JSONL) | Could | ✅ Implementado |
+| RF-13.5 | Base IATA internacional (35+ aeroportos) | Could | ✅ Implementado |
+| RF-13.6 | Integração PNR com dados de reserva | Could | ✅ Implementado |
+
 ## 6. Requisitos Não-Funcionais
 
 ### RNF-01: Desempenho
@@ -191,24 +225,27 @@ Desenvolver um agente conversacional inteligente que responde em segundos, conso
 
 ## 7. Escopo e Limitações Conhecidas
 
-### Dentro do Escopo (v1.0)
+### Dentro do Escopo (v1.0 — v3.0)
 
-- 6 voos simulados com diferentes status
-- 8 aeroportos brasileiros com coordenadas
+- 6 voos simulados com diferentes status + adapter para APIs reais
+- 35+ aeroportos internacionais com coordenadas e fusos horários
 - 8 rotas de transporte alternativo
-- 10 documentos de políticas/legislação
-- Sessão única em memória (sem persistência)
-- Interface web e CLI
+- 19+ documentos de políticas/legislação (PT/EN/ES)
+- Sessões persistentes com SQLite e histórico completo
+- Interface web multi-sessão, CLI e Dashboard de analytics
+- Integração com WhatsApp e Telegram
 - Pipeline CI/CD com GitHub Actions
+- Multi-tenant B2B com planos escalonados
+- Feedback loop com export para fine-tuning
+- Sistema PNR com dados completos de reserva
 
-### Fora do Escopo (v1.0)
+### Fora do Escopo Atual
 
-- APIs reais de aviação (FlightAware, Amadeus)
-- Autenticação de usuários
-- Histórico persistente entre reinicializações
-- Múltiplas sessões simultâneas com isolamento
-- Internacionalização (somente pt-BR)
-- Integração com sistemas de companhias aéreas
+- Deploy em produção com balanceamento de carga
+- Fine-tuning real do modelo LLM (infraestrutura preparada, execução pendente)
+- Integração com GDS (Sabre, Travelport) — apenas Amadeus implementado
+- App mobile nativo
+- Voz (speech-to-text/text-to-speech)
 
 ## 8. Métricas de Sucesso
 
@@ -228,6 +265,11 @@ Desenvolver um agente conversacional inteligente que responde em segundos, conso
 |---------|------|---------------------|----------|
 | Groq API | LLM remoto | Alta (free tier limitado) | Erro informado ao usuário |
 | Open-Meteo | Clima | Alta (API pública) | Seção de clima marcada como indisponível |
+| FlightAware (v2.0) | Status de voo | Alta (API paga) | Base simulada VOOS_DB |
+| Amadeus (v2.0) | Status/PNR | Alta (API freemium) | Base simulada |
+| Twilio (v2.0) | WhatsApp | Alta (API paga) | Canal não disponível |
+| Telegram Bot (v2.0) | Messaging | Alta (API gratuita) | Canal não disponível |
+| SQLite (v1.1) | Persistência | 100% (local) | MemorySaver in-memory |
 | GitHub Actions | CI/CD | Alta | Execução local de lint e testes |
 
 ## 10. Cronograma
@@ -242,3 +284,6 @@ Desenvolver um agente conversacional inteligente que responde em segundos, conso
 | Fase 6 | Memória de sessão | ✅ Concluído |
 | Fase 7 | Interfaces (Gradio + CLI) | ✅ Concluído |
 | Fase 8 | Testes, CI/CD e documentação | ✅ Concluído |
+| Fase 9 | v1.1 — Multi-sessão, SQLite, UX | ✅ Concluído |
+| Fase 10 | v2.0 — APIs reais, embeddings, messaging | ✅ Concluído |
+| Fase 11 | v3.0 — Multi-tenant, analytics, PNR | ✅ Concluído |

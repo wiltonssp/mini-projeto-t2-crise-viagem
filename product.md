@@ -54,11 +54,14 @@ Tornar-se a referência em assistência automatizada ao viajante em crise, integ
 |---------|--------------|
 | **Orquestração** | LangGraph StateGraph com fluxo explícito (não prompt-chain) |
 | **Controle de fluxo** | Arestas condicionais baseadas em validação |
-| **Memória** | MemorySaver com thread_id — estado persiste entre mensagens |
+| **Memória** | MemorySaver + SQLite persistente com thread_id por sessão (v1.1) |
 | **Detecção inteligente** | Regex determina resposta direta vs. plano completo (sem custo LLM) |
-| **RAG leve** | TF-IDF + cosseno — zero dependência de embeddings externos |
+| **RAG** | TF-IDF + Sentence Transformers (fallback automático) — multilíngue |
 | **Resiliência** | Try/except por nó — falha parcial nunca bloqueia o fluxo |
 | **CI/CD** | GitHub Actions com lint, testes e validação de documentação |
+| **Integrações** | Adapter pattern com FlightAware, Amadeus, Twilio, Telegram |
+| **Multi-tenant** | Planos B2B com isolamento, branding e tracking de uso |
+| **Feedback loop** | Coleta, categorização e export JSONL para fine-tuning |
 
 ## Fluxos de Uso
 
@@ -104,10 +107,16 @@ Mensagem 3: "quais meus direitos?" → usa ABC123 da memória
 
 | Fonte | Tipo | Cobertura |
 |-------|------|-----------|
-| Base de voos (VOOS_DB) | Simulada | 6 reservas com 4 status |
-| Open-Meteo API | Real (externa) | Clima global, foco em 8 aeroportos BR |
+| Base de voos (VOOS_DB) | Simulada (fallback) | 6 reservas com 4 status |
+| FlightAware AeroAPI | Real (v2.0, opcional) | Voos globais em tempo real |
+| Amadeus Flight Status | Real (v2.0, opcional) | Voos globais em tempo real |
+| Open-Meteo API | Real (externa) | Clima global, 35+ aeroportos |
 | Base de rotas (ROTAS_DB) | Simulada | 8 pares origem-destino |
-| Documentos de políticas | Estática | 10 docs sobre ANAC 400/2016 |
+| Documentos de políticas (PT) | Estática | 14 docs (ANAC 400/2016, CDC, Montreal) |
+| Documentos de políticas (EN) | Estática (v2.0) | 3 docs (EU 261, US DOT, Montreal) |
+| Documentos de políticas (ES) | Estática (v2.0) | 2 docs (Mercosur, Argentina) |
+| Base PNR | Simulada (v3.0) | 4 reservas com itinerário completo |
+| Base IATA | Estática (v3.0) | 35+ aeroportos internacionais |
 
 ## Modelo de Inteligência
 
@@ -115,9 +124,12 @@ Mensagem 3: "quais meus direitos?" → usa ABC123 da memória
 |--------|-----------|--------|
 | Detecção de intenção | Regex (Python re) | Classificar crise vs. pergunta simples |
 | Extração de entidades | Regex + heurísticas | Extrair código de reserva e cidades |
-| Busca semântica | TF-IDF + cosseno (scikit-learn) | Recuperar políticas relevantes |
+| Detecção de idioma | Heurística (v2.0) | Classificar input em PT/EN/ES |
+| Busca semântica | TF-IDF + Sentence Transformers | Recuperar políticas relevantes (fallback automático) |
 | Geração de linguagem | Llama 3.3 70B (via Groq) | Análise contextual + plano de contingência |
 | Orquestração | LangGraph StateGraph | Controle de fluxo entre nós |
+| Persistência | SQLite (v1.1) | Sessões, histórico, feedback, analytics |
+| Monitoramento | Thread daemon (v2.0) | Notificações proativas de mudança |
 
 ## Roadmap
 
@@ -134,40 +146,43 @@ Mensagem 3: "quais meus direitos?" → usa ABC123 da memória
 - [x] Pipeline CI/CD com GitHub Actions
 - [x] Documentação completa (README, PRD, product, INSTALLATION)
 
-### v1.1 — Melhorias de UX (Planejado)
+### v1.1 — Melhorias de UX (Implementado)
 
-- [ ] Suporte a múltiplas sessões simultâneas
-- [ ] Histórico persistente (SQLite/Redis)
-- [ ] Confirmação de ação antes de encerrar (ex: "precisa de mais ajuda?")
-- [ ] Interface com visualização do grafo em tempo real
+- [x] Suporte a múltiplas sessões simultâneas
+- [x] Histórico persistente (SQLite)
+- [x] Confirmação de ação antes de encerrar (ex: "precisa de mais ajuda?")
+- [x] Interface com visualização do grafo em tempo real
 
-### v2.0 — Integração Real (Futuro)
+### v2.0 — Integração Real (Implementado)
 
-- [ ] APIs reais de aviação (FlightAware, Amadeus, Cirium)
-- [ ] Embeddings semânticos (Sentence Transformers / OpenAI)
-- [ ] Base de documentos expandida (multilíngue)
-- [ ] Notificações proativas (push quando voo muda de status)
-- [ ] Integração com WhatsApp / Telegram
-- [ ] Autenticação e perfil de usuário
+- [x] APIs reais de aviação (FlightAware, Amadeus) com fallback simulado
+- [x] Embeddings semânticos (Sentence Transformers) com fallback TF-IDF
+- [x] Base de documentos expandida (multilíngue PT/EN/ES)
+- [x] Notificações proativas (push quando voo muda de status)
+- [x] Integração com WhatsApp / Telegram
+- [x] Autenticação e perfil de usuário
 
-### v3.0 — Plataforma (Visão)
+### v3.0 — Plataforma (Implementado)
 
-- [ ] Multi-tenant (B2B para companhias aéreas)
-- [ ] Dashboard de analytics (crises mais comuns, tempos de resposta)
-- [ ] Feedback loop para melhoria contínua do LLM
-- [ ] Cobertura internacional (IATA completa)
-- [ ] Integração com sistemas de reserva (PNR)
+- [x] Multi-tenant (B2B para companhias aéreas)
+- [x] Dashboard de analytics (crises mais comuns, tempos de resposta)
+- [x] Feedback loop para melhoria contínua do LLM
+- [x] Cobertura internacional (IATA — 35+ aeroportos)
+- [x] Integração com sistemas de reserva (PNR)
 
 ## Métricas do Produto
 
-| Métrica | Definição | Meta v1.0 |
-|---------|-----------|-----------|
-| Tempo até resposta | Intervalo entre envio e plano completo | < 15s |
-| Taxa de validação | % de inputs que passam na validação | > 80% (inputs válidos) |
-| Cobertura RAG | % de cenários com documentos relevantes recuperados | > 90% |
-| Resiliência | % de execuções que entregam resposta mesmo com falha parcial | 100% |
-| Cobertura de testes | % do código-fonte coberto por testes unitários | ≥ 70% |
-| Satisfação (qualitativa) | Plano gerado é acionável e personalizado | Avaliação manual |
+| Métrica | Definição | Meta v1.0 | Meta v3.0 |
+|---------|-----------|-----------|-----------|
+| Tempo até resposta | Intervalo entre envio e plano completo | < 15s | < 10s |
+| Taxa de validação | % de inputs que passam na validação | > 80% | > 90% |
+| Cobertura RAG | % de cenários com documentos relevantes recuperados | > 90% | > 95% |
+| Resiliência | % de execuções que entregam resposta mesmo com falha parcial | 100% | 100% |
+| Cobertura de testes | % do código-fonte coberto por testes unitários | ≥ 70% | ≥ 80% |
+| Satisfação (qualitativa) | Plano gerado é acionável e personalizado | Avaliação manual | Feedback loop ativo |
+| Aeroportos cobertos | Total de aeroportos na base IATA | 8 | 35+ |
+| Documentos RAG | Total de documentos na base de conhecimento | 10 | 19+ |
+| Idiomas suportados | Idiomas dos documentos e detecção | 1 (PT) | 3 (PT/EN/ES) |
 
 ## Glossário
 
@@ -181,3 +196,8 @@ Mensagem 3: "quais meus direitos?" → usa ABC123 da memória
 | **MemorySaver** | Checkpointer in-memory do LangGraph |
 | **DES** | Direitos Especiais de Saque (unidade monetária do FMI) |
 | **CI/CD** | Integração Contínua / Entrega Contínua |
+| **PNR** | Passenger Name Record — registro de reserva no sistema da companhia |
+| **Multi-tenant** | Arquitetura onde múltiplos clientes (companhias) compartilham a plataforma |
+| **Adapter Pattern** | Padrão de projeto que permite integração com múltiplos providers |
+| **Sentence Transformers** | Modelos de embeddings densos para busca semântica |
+| **Webhook** | Callback HTTP acionado por evento externo (mensagem recebida) |
