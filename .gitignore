@@ -22,5 +22,9 @@ venv/
 # PPTX
 *.pptx
 
+# Banco de dados local (persistência de sessões)
+data/
+*.db
+
 #.kiro\specs
 .kiro/

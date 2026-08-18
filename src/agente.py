@@ -24,7 +24,7 @@ from src.validacao import validar_codigo_reserva, validar_mensagem, verificar_do
 
 def _get_llm():
     """Retorna instância do ChatGroq (lazy-loaded para permitir dotenv)."""
-    return ChatGroq(model="llama-3.3-70b-versatile", temperature=0.3)
+    return ChatGroq(model="openai/gpt-oss-120b", temperature=0.3)
 
 
 # ---------------------------------------------------------------------------
@@ -131,12 +131,15 @@ def _eh_consulta_clima_direta(texto: str) -> tuple[bool, str]:
 
     # Verificar se é uma pergunta sobre clima/tempo/previsão
     padroes_clima = [
-        r"previs[aã]o\s+(do|de)\s+tempo",
+        r"previs[aã]o\s+(do|de|para\s+o|para)?\s*tempo",
+        r"previs[aã]o\s+(do|de)?\s*tempo",
         r"como\s+(est[aá]|ta)\s+(o\s+)?(clima|tempo)",
-        r"clima\s+(em|no|na|de|do)",
-        r"tempo\s+(em|no|na|de|do)",
-        r"temperatura\s+(em|no|na|de|do)",
+        r"clima\s+(em|no|na|de|do|para)",
+        r"tempo\s+(em|no|na|de|do|para)",
+        r"temperatura\s+(em|no|na|de|do|para)",
         r"condi[çc][oõ]es?\s+(clim[aá]tica|meteorol[oó]gica)",
+        r"qual\s+(a|o)?\s*previs[aã]o",
+        r"previs[aã]o.*(tempo|clima)",
     ]
 
     eh_clima = any(re.search(p, texto_lower) for p in padroes_clima)
@@ -339,12 +342,18 @@ def validacao_node(state: EstadoCrise) -> dict:
         "codigo_reserva": codigo,
         "mensagem_usuario": mensagem,
         "erros": [],
+        "status_voo": {},  # Limpar status_voo anterior para nova consulta
     }
 
 
 def consulta_voo_node(state: EstadoCrise) -> dict:
     """Nó de consulta de voo: consulta status pelo código de reserva."""
     try:
+        # Se é consulta de clima direta, não sobrescrever status_voo
+        status_voo = state.get("status_voo", {})
+        if status_voo.get("status") == "consulta_clima_direta":
+            return {}
+
         codigo = state.get("codigo_reserva", "")
         # Se não há código de reserva (ex: consulta de clima direta), pular
         if not codigo:
@@ -573,7 +582,14 @@ def gerar_plano_node(state: EstadoCrise) -> dict:
         _ = state.get("erros", [])
 
         # Verificar se é uma pergunta simples ou uma situação de crise
-        if _eh_pergunta_simples(mensagem_usuario):
+        # Se o voo está cancelado/atrasado, SEMPRE gerar plano completo
+        # (o passageiro precisa de orientação mesmo que pergunte apenas o status)
+        # EXCEÇÃO: consultas de clima diretas sempre retornam resposta direta
+        status_atual = status_voo.get("status", "").lower()
+        eh_clima_direta = status_atual == "consulta_clima_direta"
+        voo_em_crise = status_atual in ("cancelado", "atrasado", "desviado") and not eh_clima_direta
+
+        if eh_clima_direta or (_eh_pergunta_simples(mensagem_usuario) and not voo_em_crise):
             return _gerar_resposta_direta(state)
 
         # --- MODO PLANO COMPLETO (situação de crise) ---

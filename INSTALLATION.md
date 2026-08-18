@@ -65,13 +65,25 @@ pip install -r requirements.txt
 | `langgraph` | ≥0.2 | Orquestração do grafo do agente |
 | `langchain-groq` | ≥0.2 | Integração com LLM Groq |
 | `langchain-core` | ≥0.3 | Tools e tipos de mensagem |
-| `gradio` | ≥4.0 | Interface web conversacional |
+| `gradio` | ≥4.0 | Interface web conversacional + dashboard |
 | `python-dotenv` | ≥1.0 | Carregamento de variáveis .env |
-| `requests` | ≥2.31 | Chamadas HTTP (Open-Meteo API) |
+| `requests` | ≥2.31 | Chamadas HTTP (Open-Meteo, FlightAware, Amadeus) |
 | `scikit-learn` | ≥1.3 | TF-IDF e similaridade cosseno |
 | `numpy` | ≥1.24 | Operações vetoriais |
 | `pytest` | ≥7.0 | Testes unitários |
 | `pytest-cov` | ≥4.0 | Cobertura de testes |
+
+### Dependências Opcionais (v2.0+)
+
+| Pacote | Função | Fallback |
+|--------|--------|----------|
+| `sentence-transformers` | Embeddings semânticos para RAG | TF-IDF (automático) |
+| `twilio` | Integração WhatsApp | Canal indisponível |
+
+```bash
+# Para instalar dependências opcionais:
+pip install sentence-transformers twilio
+```
 
 ### Verificar Instalação
 
@@ -94,7 +106,7 @@ Ou no Windows CMD:
 copy .env.example .env
 ```
 
-### 4.2. Obter GROQ_API_KEY
+### 4.2. Obter GROQ_API_KEY (Obrigatório)
 
 1. Acesse [console.groq.com](https://console.groq.com/)
 2. Crie uma conta gratuita (se ainda não tiver)
@@ -110,6 +122,25 @@ Edite o arquivo `.env`:
 GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
+### 4.4. Configurações Opcionais (v2.0+)
+
+Para habilitar integrações reais, adicione ao `.env`:
+
+```env
+# APIs de Aviação (sem estas, usa base simulada automaticamente)
+FLIGHTAWARE_API_KEY=sua_chave_flightaware
+AMADEUS_CLIENT_ID=seu_client_id
+AMADEUS_CLIENT_SECRET=seu_client_secret
+
+# WhatsApp via Twilio
+TWILIO_ACCOUNT_SID=seu_account_sid
+TWILIO_AUTH_TOKEN=seu_auth_token
+TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
+
+# Telegram Bot
+TELEGRAM_BOT_TOKEN=seu_bot_token
+```
+
 > **Segurança:** Nunca versione o arquivo `.env`. Ele já está no `.gitignore`.
 
 ## Passo 5: Executar o Agente
@@ -122,6 +153,12 @@ python main.py web
 
 Acesse: **http://localhost:7860**
 
+A interface mostra:
+- Chat conversacional com memória
+- Painel lateral com arquitetura do grafo
+- Exemplos de uso
+- Botão "Nova Sessão" para reiniciar conversa
+
 ### Interface CLI (Terminal)
 
 ```bash
@@ -129,6 +166,16 @@ python main.py cli ABC123 "Meu voo foi cancelado por mau tempo e vou perder minh
 ```
 
 Formato: `python main.py cli <CODIGO_RESERVA> <MENSAGEM>`
+
+### Dashboard de Analytics (v3.0)
+
+```bash
+python main.py dashboard
+```
+
+Acesse: **http://localhost:7861**
+
+O dashboard mostra: sessões, interações, tempo de resposta, feedback e eventos por tipo.
 
 ## Passo 6: Executar Testes
 
@@ -251,13 +298,32 @@ git clone https://github.com/wiltonssp/mini-projeto-t2-crise-viagem.git
 
 | Serviço | Porta | Protocolo |
 |---------|-------|-----------|
-| Interface Gradio | 7860 | HTTP |
+| Interface Gradio (web) | 7860 | HTTP |
+| Dashboard Analytics | 7861 | HTTP |
 | API Open-Meteo | 443 | HTTPS (externo) |
 | API Groq | 443 | HTTPS (externo) |
+| API FlightAware (v2.0) | 443 | HTTPS (externo, opcional) |
+| API Amadeus (v2.0) | 443 | HTTPS (externo, opcional) |
+| API Twilio (v2.0) | 443 | HTTPS (externo, opcional) |
+| API Telegram (v2.0) | 443 | HTTPS (externo, opcional) |
 
 ## Requisitos de Sistema
 
-- **RAM:** ~512 MB (sem modelos locais — LLM é remoto)
-- **Disco:** ~200 MB (dependências Python)
+- **RAM:** ~512 MB (sem modelos locais — LLM é remoto). ~2 GB se usar Sentence Transformers local
+- **Disco:** ~200 MB (dependências base). ~500 MB com sentence-transformers
 - **CPU:** Qualquer processador moderno
 - **SO:** Windows 10+, Linux, macOS
+
+## Estrutura de Dados Local
+
+O sistema cria automaticamente um diretório `data/` com bancos SQLite:
+
+```
+data/
+├── sessoes.db        # Histórico de sessões e mensagens (v1.1)
+├── usuarios.db       # Autenticação e perfis (v2.0)
+├── tenants.db        # Configurações multi-tenant (v3.0)
+└── feedback.db       # Feedback e datasets de fine-tuning (v3.0)
+```
+
+Estes arquivos são criados na primeira execução e estão no `.gitignore`.
