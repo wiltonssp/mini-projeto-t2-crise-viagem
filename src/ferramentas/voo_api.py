@@ -15,7 +15,7 @@ from typing import Optional
 
 import requests
 
-from src.ferramentas.voo import VOOS_DB, _gerar_voos_db
+from src.ferramentas.voo import VOOS_DB
 
 logger = logging.getLogger(__name__)
 

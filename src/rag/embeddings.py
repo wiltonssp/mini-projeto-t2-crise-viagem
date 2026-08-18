@@ -20,9 +20,12 @@ _SENTENCE_TRANSFORMERS_DISPONIVEL = False
 _modelo_embeddings = None
 
 try:
-    from sentence_transformers import SentenceTransformer
-    _SENTENCE_TRANSFORMERS_DISPONIVEL = True
-except ImportError:
+    import importlib.util
+    _SENTENCE_TRANSFORMERS_DISPONIVEL = importlib.util.find_spec("sentence_transformers") is not None
+except Exception:
+    _SENTENCE_TRANSFORMERS_DISPONIVEL = False
+
+if not _SENTENCE_TRANSFORMERS_DISPONIVEL:
     logger.info(
         "sentence-transformers não instalado — usando TF-IDF como fallback. "
         "Para embeddings semânticos: pip install sentence-transformers"

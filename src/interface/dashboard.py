@@ -11,8 +11,7 @@ logs estruturados e detalhamento de execuções para investigação.
 import json
 import logging
 import os
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import datetime
 
 import gradio as gr
 
@@ -22,7 +21,6 @@ from src.observabilidade import (
     consultar_trace,
     consultar_traces_recentes,
     detectar_anomalias,
-    gerar_relatorio_observabilidade,
 )
 
 logger = logging.getLogger(__name__)

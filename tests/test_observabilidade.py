@@ -78,7 +78,7 @@ class TestTrace:
         """Span deve capturar erros e marcar status como ERROR."""
         trace = Trace()
         try:
-            with trace.span("node_falho") as span_data:
+            with trace.span("node_falho") as _span_data:
                 raise ValueError("Erro simulado")
         except ValueError:
             pass
