@@ -226,7 +226,11 @@ with gr.Blocks(
     gr.Markdown(
         "# ✈️ Viagem Inteligente — Gestão de Crises em Itinerários\n"
         "Informe seu código de reserva (6 caracteres, ex: ABC123) "
-        "e descreva sua situação de viagem."
+        "e descreva sua situação de viagem. O agente irá consultar o status do voo, "
+        "condições climáticas, opções de transporte alternativo e seus direitos como "
+        "passageiro para gerar um plano de contingência personalizado.\n\n"
+        "Para teste utilize as reservas que estão mocadas (mock database) - "
+        "ABC123, DEF456, GHI789, JKL012, MNO345, XYZ789"
     )
 
     with gr.Row():
@@ -251,9 +255,9 @@ with gr.Blocks(
 
             gr.Markdown("### 💡 Exemplos")
             gr.Markdown(
-                "- `ABC123 Meu voo foi cancelado por mau tempo`\n"
-                "- `MNO345 Preciso chegar a Porto Alegre urgente`\n"
-                "- `DEF456 Voo atrasou mais de 4 horas`\n"
+                "- `ABC123 Meu voo foi cancelado por mau tempo e vou perder minha conexão para o Rio.`\n"
+                "- `MNO345 Meu voo está cancelado por neblina e preciso chegar a Porto Alegre urgente.`\n"
+                "- `DEF456 Estou no aeroporto de Brasília e meu voo atrasou mais de 4 horas.`\n"
                 "- `Previsão do tempo em Curitiba`\n"
                 "- `Quais meus direitos?` (com sessão ativa)"
             )
