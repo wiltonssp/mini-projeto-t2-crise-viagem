@@ -469,7 +469,7 @@ def gerar_relatorio_observabilidade(trace_id: Optional[str] = None) -> str:
         erros = [r for r in registros if r["status"] == "ERROR"]
 
         relatorio = f"## Relatório de Execução — Trace {trace_id}\n\n"
-        relatorio += f"| Métrica | Valor |\n|---------|-------|\n"
+        relatorio += "| Métrica | Valor |\n|---------|-------|\n"
         relatorio += f"| Trace ID | `{trace_id}` |\n"
         relatorio += f"| Total de Nós | {len(registros)} |\n"
         relatorio += f"| Latência Total | {total_ms:.0f}ms |\n"
