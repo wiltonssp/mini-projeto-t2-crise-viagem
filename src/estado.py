@@ -5,6 +5,7 @@ Define o TypedDict que flui por todos os nós do grafo LangGraph,
 mantendo os dados coletados durante a execução do fluxo.
 """
 
+import operator
 from typing import Annotated, TypedDict
 
 from langgraph.graph.message import add_messages
@@ -18,6 +19,9 @@ class EstadoCrise(TypedDict):
     - dict → {}
     - list → []
     - bool → False
+
+    Campos com Annotated[..., operator.add] usam reducer de acumulação,
+    permitindo que nós paralelos acumulem valores sem sobrescrever.
     """
 
     messages: Annotated[list, add_messages]  # Histórico de mensagens (chat)
@@ -30,5 +34,5 @@ class EstadoCrise(TypedDict):
     politicas_recuperadas: list  # Documentos RAG de políticas da empresa
     direitos_passageiro: list  # Documentos RAG de legislação de direitos
     relatorio_final: str  # Plano de contingência gerado em Markdown
-    erros: list  # Erros registrados durante execução do grafo
+    erros: Annotated[list, operator.add]  # Erros acumulados (reducer para paralelização)
     validacao_ok: bool  # Flag indicando se a validação foi aprovada
