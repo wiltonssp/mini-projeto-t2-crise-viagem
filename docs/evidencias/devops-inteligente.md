@@ -187,3 +187,31 @@ pode ultrapassar 60 segundos caso o padrão de crescimento se mantenha sem otimi
 ---
 
 *Análise realizada com apoio de IA (Kiro) — Agosto/2026*
+
+---
+
+## 7. Visualização no Dashboard
+
+Os dados de observabilidade (traces, anomalias, logs) podem ser visualizados interativamente no dashboard da aplicação:
+
+```bash
+python main.py dashboard
+# Acesse http://localhost:7861 → aba "🔍 Observabilidade"
+```
+
+### Funcionalidades da aba de Observabilidade
+
+| Seção | O que exibe |
+|-------|-------------|
+| **Traces Recentes** | Tabela com todas as execuções do agente (trace_id, nós executados, erros, latência total, status) |
+| **Detecção de Anomalias** | Identificação automática de latência alta (>3x média) e taxa de erro >20%, com indicador de severidade |
+| **Investigar Trace** | Detalhamento completo de uma execução — cada nó com input, output, erro e gráfico ASCII de latência |
+| **Logs Estruturados** | Últimas entradas do `data/agent.log` parseadas em tabela (timestamp, level, node, message, trace_id) |
+
+### Como reproduzir
+
+1. Execute o agente via `python main.py web` e faça pelo menos 2 consultas (uma crise e uma adversarial)
+2. Abra o dashboard via `python main.py dashboard`
+3. Na aba "🔍 Observabilidade", clique em "Atualizar Observabilidade"
+4. Copie um `trace_id` da tabela de traces e cole no campo "Investigar" → clique "Investigar"
+5. Visualize o fluxo completo da execução nó a nó com latência e status
