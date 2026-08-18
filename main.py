@@ -98,12 +98,23 @@ def main():
         print(f"\n   Dashboard: http://localhost:7861\n")
         dashboard_app.launch(server_name="127.0.0.1", server_port=7861)
 
+    elif modo == "webhook":
+        _mostrar_info_inicializacao()
+        from src.webhook import iniciar_webhook
+        print("\n   Webhook para integração low-code (n8n, Make, Zapier)")
+        print("   Endpoints:")
+        print("     POST /webhook/alerta-voo  — Processar alerta de crise")
+        print("     GET  /webhook/health      — Health check")
+        print("     GET  /webhook/metricas    — Métricas de observabilidade\n")
+        iniciar_webhook(port=5000, background=False)
+
     else:
         print(f"ERRO: Modo '{modo}' não reconhecido.")
-        print("Uso: python main.py [web|cli|dashboard]")
+        print("Uso: python main.py [web|cli|dashboard|webhook]")
         print("  web       - Inicia interface Gradio (padrão)")
         print("  cli       - Executa via linha de comando")
         print("  dashboard - Inicia dashboard de analytics")
+        print("  webhook   - Inicia endpoint para integração low-code")
         sys.exit(1)
 
 
