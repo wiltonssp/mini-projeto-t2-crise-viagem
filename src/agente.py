@@ -17,6 +17,11 @@ from src.estado import EstadoCrise
 from src.ferramentas.clima import consultar_clima
 from src.ferramentas.transporte import consultar_transporte_alternativo
 from src.ferramentas.voo import consultar_status_voo
+from src.governanca import (
+    detectar_prompt_injection,
+    gerar_resposta_bloqueio,
+    sanitizar_entrada,
+)
 from src.rag.busca import BuscaSemantica
 from src.rag.documentos import DOCUMENTOS_POLITICAS
 from src.validacao import validar_codigo_reserva, validar_mensagem, verificar_dominio
@@ -215,6 +220,18 @@ def validacao_node(state: EstadoCrise) -> dict:
             "erros": [{"nó": "validacao", "erro": "Nenhuma mensagem do usuário encontrada."}],
         }
 
+    # SEGURANÇA: Detectar prompt injection antes de qualquer processamento
+    is_injection, motivo_injection = detectar_prompt_injection(texto_usuario)
+    if is_injection:
+        return {
+            "validacao_ok": False,
+            "erros": [{"nó": "governanca", "erro": motivo_injection}],
+            "relatorio_final": gerar_resposta_bloqueio(),
+        }
+
+    # Sanitizar entrada (remove tokens de controle de LLM)
+    texto_usuario = sanitizar_entrada(texto_usuario)
+
     # Verificar se é uma consulta de clima direta (sem código de reserva)
     eh_clima_direta, aeroporto_clima = _eh_consulta_clima_direta(texto_usuario)
     if eh_clima_direta and aeroporto_clima:
@@ -363,7 +380,7 @@ def consulta_voo_node(state: EstadoCrise) -> dict:
         return {"status_voo": dados_voo}
     except Exception as e:
         return {
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "consulta_voo", "erro": str(e), "tipo": type(e).__name__}
             ]
         }
@@ -383,7 +400,7 @@ def consulta_clima_node(state: EstadoCrise) -> dict:
         return {"info_clima": dados_clima}
     except Exception as e:
         return {
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "consulta_clima", "erro": str(e), "tipo": type(e).__name__}
             ]
         }
@@ -406,7 +423,7 @@ def consulta_transporte_node(state: EstadoCrise) -> dict:
         return {"alternativas_transporte": opcoes}
     except Exception as e:
         return {
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "consulta_transporte", "erro": str(e), "tipo": type(e).__name__}
             ]
         }
@@ -451,7 +468,7 @@ def rag_node(state: EstadoCrise) -> dict:
         }
     except Exception as e:
         return {
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "rag", "erro": str(e), "tipo": type(e).__name__}
             ]
         }
@@ -498,7 +515,7 @@ def analise_llm_node(state: EstadoCrise) -> dict:
         }
     except Exception as e:
         return {
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "analise_llm", "erro": str(e), "tipo": type(e).__name__}
             ]
         }
@@ -673,7 +690,7 @@ def gerar_plano_node(state: EstadoCrise) -> dict:
         )
         return {
             "relatorio_final": erro_msg,
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "gerar_plano", "erro": str(e), "tipo": type(e).__name__}
             ],
         }
@@ -733,7 +750,7 @@ def _gerar_resposta_direta(state: EstadoCrise) -> dict:
         erro_msg = f"Não foi possível processar sua pergunta. Motivo: {str(e)}"
         return {
             "relatorio_final": erro_msg,
-            "erros": state.get("erros", []) + [
+            "erros": [
                 {"nó": "gerar_plano", "erro": str(e), "tipo": type(e).__name__}
             ],
         }
@@ -805,9 +822,11 @@ def build_graph():
     # Aresta condicional: validação → consulta_voo (ok) ou erro (falha)
     graph.add_conditional_edges("validacao", roteador_validacao)
 
-    # Arestas sequenciais do fluxo principal
+    # Paralelização: consulta_clima e consulta_transporte executam em paralelo
+    # após consulta_voo (fan-out) e convergem antes do rag (fan-in)
     graph.add_edge("consulta_voo", "consulta_clima")
-    graph.add_edge("consulta_clima", "consulta_transporte")
+    graph.add_edge("consulta_voo", "consulta_transporte")
+    graph.add_edge("consulta_clima", "rag")
     graph.add_edge("consulta_transporte", "rag")
     graph.add_edge("rag", "analise_llm")
     graph.add_edge("analise_llm", "gerar_plano")
