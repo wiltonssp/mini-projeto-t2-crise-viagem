@@ -15,6 +15,7 @@ import gradio as gr
 from langchain_core.messages import HumanMessage
 
 from src.agente import build_graph
+from src.observabilidade import Trace, get_logger
 from src.persistencia import get_gerenciador
 
 
@@ -107,14 +108,24 @@ def responder(mensagem: str, historico: list, request: gr.Request = None) -> str
     config = {"configurable": {"thread_id": thread_id}}
 
     inicio = time.time()
+    trace = Trace()
+    obs_logger = get_logger()
 
     try:
-        resultado = _get_graph().invoke(
-            {"messages": [HumanMessage(content=mensagem)]},
-            config,
-        )
+        with trace.span("graph_invoke", f"mensagem='{mensagem[:100]}'") as span_data:
+            resultado = _get_graph().invoke(
+                {"messages": [HumanMessage(content=mensagem)]},
+                config,
+            )
+            span_data["output"] = f"codigo={resultado.get('codigo_reserva', '')}"
+            span_data["metadata"] = {
+                "thread_id": thread_id,
+                "validacao_ok": resultado.get("validacao_ok", False),
+                "erros_count": len(resultado.get("erros", [])),
+            }
 
         tempo_ms = int((time.time() - inicio) * 1000)
+        trace.finalizar()
 
         # Priorizar o relatório final; fallback para a última mensagem
         relatorio = resultado.get("relatorio_final", "")
@@ -165,6 +176,11 @@ def responder(mensagem: str, historico: list, request: gr.Request = None) -> str
 
     except Exception as e:
         tempo_ms = int((time.time() - inicio) * 1000)
+        trace.finalizar()
+        obs_logger.error(
+            f"Execução falhou: {e}",
+            extra={"trace_id": trace.trace_id, "latency_ms": tempo_ms}
+        )
         gerenciador.registrar_evento_analytics(
             evento="erro",
             thread_id=thread_id,
