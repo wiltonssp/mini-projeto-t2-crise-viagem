@@ -53,15 +53,52 @@ Tornar-se a referência em assistência automatizada ao viajante em crise, integ
 | Aspecto | Implementação |
 |---------|--------------|
 | **Orquestração** | LangGraph StateGraph com fluxo explícito (não prompt-chain) |
-| **Controle de fluxo** | Arestas condicionais baseadas em validação |
+| **Controle de fluxo** | Arestas condicionais baseadas em validação + paralelização |
 | **Memória** | MemorySaver + SQLite persistente com thread_id por sessão (v1.1) |
 | **Detecção inteligente** | Regex determina resposta direta vs. plano completo (sem custo LLM) |
 | **RAG** | TF-IDF + Sentence Transformers (fallback automático) — multilíngue |
 | **Resiliência** | Try/except por nó — falha parcial nunca bloqueia o fluxo |
+| **Governança** | 15+ padrões de prompt injection + limites de autonomia + sanitização |
+| **Observabilidade** | 2 sinais (logs JSON + auditoria SQLite) correlacionados por trace_id |
 | **CI/CD** | GitHub Actions com lint, testes e validação de documentação |
 | **Integrações** | Adapter pattern com FlightAware, Amadeus, Twilio, Telegram |
 | **Multi-tenant** | Planos B2B com isolamento, branding e tracking de uso |
 | **Feedback loop** | Coleta, categorização e export JSONL para fine-tuning |
+
+## Modelo de Decisão do Agente
+
+O agente implementa um modelo de decisão em múltiplas camadas que combina regras determinísticas com geração via LLM:
+
+### Camada 1 — Segurança (Determinística)
+- **Entrada:** Mensagem bruta do usuário
+- **Decisão:** Bloquear ou permitir
+- **Mecanismo:** 15+ padrões regex de prompt injection + heurísticas de comprimento/delimitadores
+- **Resultado:** Se detectado, resposta de bloqueio é gerada SEM chamar o LLM
+
+### Camada 2 — Classificação de Intenção (Determinística)
+- **Entrada:** Mensagem sanitizada
+- **Decisões:**
+  - É consulta de clima direta? → Rota simplificada (sem código de reserva)
+  - É pergunta sobre voo sem código? → Solicita código ao usuário
+  - Código de reserva presente ou na memória? → Prossegue com fluxo
+- **Mecanismo:** Regex com padrões de perguntas + mapa de cidades para IATA
+
+### Camada 3 — Coleta e Enriquecimento (APIs + Dados)
+- **Entrada:** Código de reserva validado + intenção classificada
+- **Execução:** Consultas paralelas (clima + transporte após voo) + RAG
+- **Resiliência:** Cada consulta isolada em try/except; falhas não bloqueiam
+
+### Camada 4 — Tipo de Resposta (Determinística)
+- **Entrada:** Dados coletados + mensagem original + status do voo
+- **Decisão:** Resposta direta OU plano completo de 5 seções
+- **Critério:** `_eh_pergunta_simples()` + status do voo (crise força plano)
+- **Sobreescrita:** Voo cancelado/atrasado/desviado SEMPRE gera plano, mesmo se pergunta simples
+
+### Camada 5 — Geração (LLM)
+- **Modelo:** openai/gpt-oss-120b via Groq API (temperature=0.3)
+- **Prompt de Sistema:** Instruções rígidas de formato, idioma e personalização
+- **Contexto:** Todos os dados coletados (voo, clima, transporte, RAG) + erros
+- **Regras de saída:** ≤30 palavras/frase, português BR, dados do viajante em ≥3 seções
 
 ## Fluxos de Uso
 
@@ -126,7 +163,7 @@ Mensagem 3: "quais meus direitos?" → usa ABC123 da memória
 | Extração de entidades | Regex + heurísticas | Extrair código de reserva e cidades |
 | Detecção de idioma | Heurística (v2.0) | Classificar input em PT/EN/ES |
 | Busca semântica | TF-IDF + Sentence Transformers | Recuperar políticas relevantes (fallback automático) |
-| Geração de linguagem | Llama 3.3 70B (via Groq) | Análise contextual + plano de contingência |
+| Geração de linguagem | openai/gpt-oss-120b (via Groq, temp=0.3) | Análise contextual + plano de contingência |
 | Orquestração | LangGraph StateGraph | Controle de fluxo entre nós |
 | Persistência | SQLite (v1.1) | Sessões, histórico, feedback, analytics |
 | Monitoramento | Thread daemon (v2.0) | Notificações proativas de mudança |
@@ -138,7 +175,7 @@ Mensagem 3: "quais meus direitos?" → usa ABC123 da memória
 - [x] Fluxo completo com 8 nós LangGraph
 - [x] Ferramentas: voo (simulado), clima (real), transporte (simulado)
 - [x] RAG com TF-IDF sobre 10 documentos ANAC
-- [x] Geração de plano com LLM (Groq/Llama 3.3)
+- [x] Geração de plano com LLM (Groq / openai/gpt-oss-120b)
 - [x] Detecção de intenção (crise vs. pergunta simples)
 - [x] Memória de sessão (MemorySaver)
 - [x] Interface web (Gradio) + CLI
