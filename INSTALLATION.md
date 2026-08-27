@@ -175,7 +175,9 @@ python main.py dashboard
 
 Acesse: **http://localhost:7861**
 
-O dashboard mostra: sessões, interações, tempo de resposta, feedback e eventos por tipo.
+O dashboard possui duas abas:
+- **📈 Analytics** — sessões, interações, tempo de resposta, feedback e eventos por tipo
+- **🔍 Observabilidade** — traces recentes, detecção de anomalias, investigação de execução por trace_id e logs estruturados
 
 ## Passo 6: Executar Testes
 
@@ -300,6 +302,7 @@ git clone https://github.com/wiltonssp/mini-projeto-t2-crise-viagem.git
 |---------|-------|-----------|
 | Interface Gradio (web) | 7860 | HTTP |
 | Dashboard Analytics | 7861 | HTTP |
+| Webhook (integração low-code) | 5000 | HTTP |
 | API Open-Meteo | 443 | HTTPS (externo) |
 | API Groq | 443 | HTTPS (externo) |
 | API FlightAware (v2.0) | 443 | HTTPS (externo, opcional) |
@@ -320,10 +323,12 @@ O sistema cria automaticamente um diretório `data/` com bancos SQLite:
 
 ```
 data/
-├── sessoes.db        # Histórico de sessões e mensagens (v1.1)
-├── usuarios.db       # Autenticação e perfis (v2.0)
-├── tenants.db        # Configurações multi-tenant (v3.0)
-└── feedback.db       # Feedback e datasets de fine-tuning (v3.0)
+├── sessoes.db          # Histórico de sessões e mensagens (v1.1)
+├── observabilidade.db  # Traces e registros de auditoria (v1.1)
+├── usuarios.db         # Autenticação e perfis (v2.0)
+├── tenants.db          # Configurações multi-tenant (v3.0)
+├── feedback.db         # Feedback e datasets de fine-tuning (v3.0)
+└── agent.log           # Logs estruturados em JSON (observabilidade)
 ```
 
 Estes arquivos são criados na primeira execução e estão no `.gitignore`.

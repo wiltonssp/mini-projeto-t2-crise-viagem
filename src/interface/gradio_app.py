@@ -226,7 +226,7 @@ def criar_interface_grafo():
 3. **Consulta Clima** — API Open-Meteo para condições meteorológicas
 4. **Transporte** — Alternativas de transporte (voo, ônibus, trem)
 5. **RAG** — Recupera políticas e direitos do passageiro (TF-IDF)
-6. **Análise LLM** — Síntese contextual com Llama 3.3 70B
+6. **Análise LLM** — Síntese contextual com GPT-OSS-120B via Groq
 7. **Gerar Plano** — Plano de contingência personalizado em Markdown
 """
     return grafo_markdown

@@ -5,7 +5,6 @@ v2.0: Monitora voos registrados e envia notificações quando há
 alterações (cancelamento, atraso, mudança de gate, etc.).
 """
 
-import json
 import logging
 import threading
 import time

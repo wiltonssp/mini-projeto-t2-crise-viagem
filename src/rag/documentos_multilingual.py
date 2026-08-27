@@ -5,6 +5,8 @@ v2.0: Expande a base de documentos com versões em inglês e espanhol,
 além de novos documentos sobre regulamentações internacionais.
 """
 
+from typing import Optional
+
 from src.rag.documentos import DOCUMENTOS_POLITICAS
 
 # Documentos adicionais em inglês

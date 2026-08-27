@@ -1,0 +1,18 @@
+[run]
+source = src
+omit =
+    src/autenticacao.py
+    src/feedback.py
+    src/ferramentas/pnr.py
+    src/ferramentas/voo_api.py
+    src/ferramentas/aeroportos.py
+    src/interface/dashboard.py
+    src/interface/messaging.py
+    src/multitenant.py
+    src/notificacoes.py
+    src/rag/documentos_multilingual.py
+    src/rag/embeddings.py
+    src/webhook.py
+
+[report]
+show_missing = true
