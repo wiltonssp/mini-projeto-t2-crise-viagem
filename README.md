@@ -5,13 +5,14 @@
 [![Groq](https://img.shields.io/badge/LLM-Groq%20GPT--OSS--120B-orange.svg)](https://console.groq.com/)
 [![License: Academic](https://img.shields.io/badge/license-Academic-lightgrey.svg)](#licença)
 
-> **Repositório:** [https://github.com/wiltonssp/mini-projeto-t2-crise-viagem](https://github.com/wiltonssp/mini-projeto-t2-crise-viagem)
+## Repositório
+> [https://github.com/wiltonssp/mini-projeto-t2-crise-viagem](https://github.com/wiltonssp/mini-projeto-t2-crise-viagem)
 
-> **Quadro Kanban:** [GitHub Project](https://github.com/users/wiltonssp/projects/4)
-
+## Quadro Kanban
+> [GitHub Project](https://github.com/users/wiltonssp/projects/4)
 
 ## Vídeo de Demonstração
-> **YouTube:** [Adicionar link do vídeo aqui]
+> **YouTube:** [https://youtu.be/GSyRXRqyIEg](https://youtu.be/GSyRXRqyIEg)
 
 ## Visão Geral
 
